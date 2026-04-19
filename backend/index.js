@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const cors = require('cors');
 const { State } = require('./data');
 
@@ -40,7 +41,7 @@ app.post('/api/incidents', (req, res) => {
 app.post('/api/incidents/:id/resolve', (req, res) => {
     State.incidents = State.incidents.filter(i => i.id !== req.params.id);
     State.resolvedCount++;
-    res.json({ success: true, count: State.resolvedCount });
+    res.json({ success: true, newIncidents: State.incidents });
 });
 app.delete('/api/incidents/resolved', (req, res) => {
     // Currently clear all resolved is a no-op as they are removed, but we keep the endpoint
@@ -110,6 +111,14 @@ app.delete('/api/incentives/:index', (req, res) => {
     res.json(State.incentives);
 });
 
+
+// Serve frontend in production
+if (process.env.NODE_ENV === 'production') {
+    app.use(express.static(path.join(__dirname, '../frontend/dist')));
+    app.get('*', (req, res) => {
+        res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
+    });
+}
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
