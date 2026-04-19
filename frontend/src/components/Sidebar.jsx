@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
-export default function Sidebar() {
+export default function Sidebar({ isOpen, onClose }) {
   const [incidents, setIncidents] = useState([]);
 
   useEffect(() => {
@@ -17,8 +17,10 @@ export default function Sidebar() {
   const navItemClass = ({ isActive }) => isActive ? 'nav-item active' : 'nav-item';
 
   return (
-    <nav className="sidebar">
-      <div className="nav-section">Overview</div>
+    <>
+      {isOpen && <div className="sidebar-overlay" onClick={onClose}></div>}
+      <nav className={`sidebar ${isOpen ? 'open' : ''}`}>
+        <div className="nav-section">Overview</div>
       <NavLink to="/dashboard" className={navItemClass}>
         <div className="nav-icon"><LayoutGrid size={14} /></div>
         Command Center
@@ -60,10 +62,11 @@ export default function Sidebar() {
       </NavLink>
 
       <div className="nav-section">Fan Journey</div>
-      <NavLink to="/journey" className={navItemClass}>
+      <NavLink to="/journey" className={navItemClass} onClick={onClose}>
         <div className="nav-icon"><Navigation size={14} /></div>
         Fan Journey
       </NavLink>
     </nav>
+    </>
   );
 }

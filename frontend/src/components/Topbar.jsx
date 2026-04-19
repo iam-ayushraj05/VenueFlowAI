@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useTheme } from '../context/ThemeContext';
-import { Moon, Sun } from 'lucide-react';
+import { Moon, Sun, Menu } from 'lucide-react';
 
-export default function Topbar() {
+export default function Topbar({ onMenuClick }) {
   const [time, setTime] = useState('');
   const { theme, toggleTheme } = useTheme();
 
@@ -22,6 +22,9 @@ export default function Topbar() {
 
   return (
     <header className="topbar">
+      <button className="mobile-menu-btn" onClick={onMenuClick} style={{ background: 'transparent', border: 'none', color: 'var(--text)', cursor: 'pointer', padding: '4px' }}>
+        <Menu size={20} />
+      </button>
       <div className="logo">
         <div className="logo-dot"></div>
         VenueFlow AI

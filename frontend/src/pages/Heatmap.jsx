@@ -9,6 +9,8 @@ export default function Heatmap() {
   const chartInstance = useRef(null);
   const [density, setDensity] = useState(68);
   const [zoneDetail, setZoneDetail] = useState(null);
+  const [hoverZone, setHoverZone] = useState(null);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [state, setState] = useState(null);
   const { toast } = useToast();
   const { theme } = useTheme();
@@ -98,7 +100,7 @@ export default function Heatmap() {
     }
   }, [state]);
 
-  const handleCanvasClick = (e) => {
+  const handleCanvasHover = (e) => {
     const rect = canvasRef.current.getBoundingClientRect();
     const rx = (e.clientX - rect.left) / rect.width;
     const ry = (e.clientY - rect.top) / rect.height;
@@ -111,7 +113,12 @@ export default function Heatmap() {
       {name:'Concourse B',xr:[.25,.75],yr:[.35,.65],occ:30,flow:22,risk:'Low'},
     ];
     const z = zones.find(z => rx >= z.xr[0] && rx <= z.xr[1] && ry >= z.yr[0] && ry <= z.yr[1]);
-    setZoneDetail(z || null);
+    setHoverZone(z || null);
+    setMousePos({ x: e.clientX, y: e.clientY });
+  };
+
+  const handleCanvasClick = (e) => {
+    if (hoverZone) setZoneDetail(hoverZone);
   };
 
   const triggerSurge = () => {
@@ -141,10 +148,20 @@ export default function Heatmap() {
       </div>
 
       <div className="grid-2-1">
-        <div className="card" style={{ padding: '12px' }}>
-          <div className="card-title">Stadium overview — tap zones for detail</div>
-          <canvas ref={canvasRef} onClick={handleCanvasClick} style={{ width: '100%', height: '380px', borderRadius: '8px', cursor: 'crosshair', background: 'var(--bg3)', display: 'block' }}></canvas>
+        <div className="card" style={{ padding: '12px', position: 'relative' }}>
+          <div className="card-title">Stadium overview — hover/tap zones for detail</div>
+          <canvas ref={canvasRef} onClick={handleCanvasClick} onMouseMove={handleCanvasHover} onMouseLeave={() => setHoverZone(null)} style={{ width: '100%', height: '380px', borderRadius: '8px', cursor: 'crosshair', background: 'var(--bg3)', display: 'block' }}></canvas>
           
+          {hoverZone && (
+            <div style={{ position: 'fixed', left: mousePos.x + 15, top: mousePos.y + 15, background: 'var(--surface)', backdropFilter: 'blur(10px)', border: '1px solid var(--border)', borderRadius: '8px', padding: '10px', pointerEvents: 'none', zIndex: 100, boxShadow: '0 4px 12px rgba(0,0,0,0.2)', width: '200px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                <span style={{ fontSize: '13px', fontWeight: 600 }}>{hoverZone.name}</span>
+                <span className={`badge ${hoverZone.risk === 'Critical' || hoverZone.risk === 'High' ? 'red' : hoverZone.risk === 'Moderate' ? 'amber' : 'green'}`}>{hoverZone.risk}</span>
+              </div>
+              <div style={{ fontSize: '11px', color: 'var(--text3)' }}>Occ: {hoverZone.occ}% · Flow: {hoverZone.flow} ppm</div>
+            </div>
+          )}
+
           <div className="legend" style={{ marginTop: '10px' }}>
             <div className="legend-item"><div className="legend-dot" style={{ background: '#00FF9D' }}></div>Free flow (&lt;40%)</div>
             <div className="legend-item"><div className="legend-dot" style={{ background: '#FFB020' }}></div>Congested (40–75%)</div>

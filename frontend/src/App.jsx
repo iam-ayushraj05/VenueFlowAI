@@ -13,16 +13,19 @@ import Journey from './pages/Journey';
 import ToastContainer from './components/ToastContainer';
 import { ToastProvider } from './context/ToastContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { useState } from 'react';
 
 function App() {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   return (
     <ThemeProvider>
       <ToastProvider>
         <div className="bg-grid"></div>
         <ToastContainer />
         <div className="app">
-        <Topbar />
-        <Sidebar />
+        <Topbar onMenuClick={() => setIsSidebarOpen(true)} />
+        <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
         <main className="main">
           <Routes>
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
